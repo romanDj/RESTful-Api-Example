@@ -38,7 +38,7 @@ class CommentController extends ActiveController
 
 
         $behaviors['authenticator']['class'] = HttpBearerAuth::className();
-        $behaviors['authenticator']['only'] = ['delete'];
+        $behaviors['authenticator']['optional'] = ['delete'];
 
         return $behaviors;
     }
@@ -103,30 +103,44 @@ class CommentController extends ActiveController
 
     //удаление комментария
     public function actionDelete($post_id, $comment_id){
-        $post = Posts::find()->where(['id' => $post_id])->one();
-        $comment = Comment::find()->where(['comment_id' => $comment_id])->one();
-        if($comment == null){
-            Yii::$app->response->statusCode = 404;
-            Yii::$app->response->statusText = "Comment not found";
-            return [ 'message' => "Comment not found" ];
+
+        if(Yii::$app->user->identity->isAdmin){
+
+            $post = Posts::find()->where(['id' => $post_id])->one();
+            $comment = Comment::find()->where(['comment_id' => $comment_id])->one();
+            if($comment == null){
+                Yii::$app->response->statusCode = 404;
+                Yii::$app->response->statusText = "Comment not found";
+                return [ 'message' => "Comment not found" ];
+            }
+
+            elseif($post == null){
+                Yii::$app->response->statusCode = 404;
+                Yii::$app->response->statusText = "Post not found";
+                return ['message' => "Post not found"];
+            }
+
+            else{
+
+                Yii::$app->response->statusCode = 201;
+                Yii::$app->response->statusText = "Successful delete";
+
+                Comment::find()->where(['comment_id' => $comment_id])->
+                andWhere(['posts_id'=>$post_id])->one()->delete();
+
+                return [ 'status' => true ];
+            }
+
+        }else{
+            Yii::$app->response->statusCode = 401;
+            Yii::$app->response->statusText = 'Unauthorized';
+            return[
+                'status' => false,
+                'message' => 'Unauthorized'
+            ];
         }
 
-        elseif($post == null){
-            Yii::$app->response->statusCode = 404;
-            Yii::$app->response->statusText = "Post not found";
-            return ['message' => "Post not found"];
-        }
 
-        else{
-
-            Yii::$app->response->statusCode = 201;
-            Yii::$app->response->statusText = "Successful delete";
-
-            Comment::find()->where(['comment_id' => $comment_id])->
-            andWhere(['posts_id'=>$post_id])->one()->delete();
-
-            return [ 'status' => true ];
-        }
 
     }
 

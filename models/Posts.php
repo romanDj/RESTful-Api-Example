@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "posts".
@@ -59,10 +60,38 @@ class Posts extends \yii\db\ActiveRecord
         ];
     }
 
+    public function fields(){
+        return [
+            'title',
+            'datatime' => function () {
+                return $this->date;
+            } ,
+            'anons',
+            'text',
+            'tags',
+            'image' => function(){
+                return $this->images;
+            }
+
+        ];
+    }
+
+
+
     public static function getAll(){
         return Posts::find()->all();
     }
 
+
+    public function getDate(){
+        return Yii::$app->formatter->asDate($this->datatime, 'H:i dd.MM.Y');
+    }
+
+    public function getImages(){
+
+        return Url::toRoute('post_images/'.$this->image,true);
+
+    }
 
     //связь для просмотра комментов
     public function getComments(){
