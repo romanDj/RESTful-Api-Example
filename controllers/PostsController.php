@@ -41,6 +41,7 @@ class PostsController extends ActiveController
 
         $behaviors['authenticator']['class'] = HttpBearerAuth::className();
         $behaviors['authenticator']['optional'] = ['create','update-post', 'delete'];
+        $behaviors['authenticator']['except'] = ['get', 'index', 'view'];
 
         return $behaviors;
     }

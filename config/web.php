@@ -26,6 +26,7 @@ $config = [
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
+            'enableSession' => false,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -64,6 +65,7 @@ $config = [
                 'DELETE posts/<post_id>' => 'posts/delete',
                 'DELETE posts/<post_id>/comments/<comment_id>' => 'comment/delete',
                 'POST auth' => 'user/login',
+
 
 
             ],

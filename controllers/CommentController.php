@@ -19,6 +19,7 @@ use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\Cors;
 use yii\rest\ActiveController;
+use yii\rest\Controller;
 use yii\web\UploadedFile;
 
 class CommentController extends ActiveController
@@ -36,12 +37,20 @@ class CommentController extends ActiveController
         ];
 
 
+        $behaviors['authenticator'] = [
+            'class' => HttpBearerAuth::className(),
+            'optional' => ['delete','add-comment']
+        ];
+//        $behaviors['authenticator']['class'] = HttpBearerAuth::className();
+//        $behaviors['authenticator']['optional'] = ['delete'];
+        //$behaviors['authenticator']['optional'] = ['delete'];
 
-        $behaviors['authenticator']['class'] = HttpBearerAuth::className();
-        $behaviors['authenticator']['optional'] = ['delete'];
+         //$behaviors['authenticator']['except'] = ['add-comment',/* 'add-comment'*/];
+
 
         return $behaviors;
     }
+
 
 
     public function actions()
@@ -58,14 +67,22 @@ class CommentController extends ActiveController
         return $actions;
     }
 
+
     //добавление комментариев
     public function  actionAddComment($post_id){
+
+
         $post = Posts::find()->where(['id' => $post_id])->one();
 
         if($post!=null){
 
             $model = new Comment();
             if($model->load(Yii::$app->request->post(), "")){
+
+                if(!Yii::$app->user->isGuest){
+                    $model->author = Yii::$app->user->identity->login;
+                }
+
 
                 if($model->validate()){
 
